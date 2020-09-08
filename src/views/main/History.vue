@@ -35,15 +35,13 @@
 </template>
 
 <script>
-    import HeadBar from "@components/HeadBar";
-    import ToolBar from "@components/ToolBar";
     import {getStore, setStore} from "@/utils/util";
 
     export default {
         name: "History",
         components: {
-            'head-bar': HeadBar,
-            'tool-bar': ToolBar
+            'head-bar': () => import('@components/HeadBar'),
+            'tool-bar': () => import('@components/ToolBar')
         },
         data() {
             return {
@@ -86,27 +84,55 @@
                         return true
                     }
                 })
-                this.$router.push({
-                    name: 'customResult', query: {
-                        model: history.model,
-                        power: history.power,
-                        gas: history.gas,
-                        flasche: history.flasche,
-                        material: history.material,
-                        rate: history.rate,
-                        volume: history.volume,
-                        cMaschine: history.cMaschine,
-                        cMaterial: history.cMaterial,
-                        cElektricity: history.cElektricity,
-                        cGas: history.cGas,
-                        cLabor: history.cLabor,
-                        cTotal: history.cTotal,
-                    }
-                })
+                if (history.type == 'custom') {
+                    this.$router.push({
+                        name: 'customResult', query: {
+                            model: history.model,
+                            power: history.power,
+                            gas: history.gas,
+                            flasche: history.flasche,
+                            material: history.material,
+                            rate: history.rate,
+                            volume: history.volume,
+                            cMaschine: history.cMaschine,
+                            cMaterial: history.cMaterial,
+                            cElektricity: history.cElektricity,
+                            cGas: history.cGas,
+                            cLabor: history.cLabor,
+                            cTotal: history.cTotal,
+                        }
+                    })   
+                } else {
+                    this.$router.push({
+                        name: 'result', query: {
+                            process: history.process,
+                            company: history.company,
+                            maschine: history.maschine,
+                            material: history.material,
+                            volume: history.volume,
+                            cMaschine: history.cMaschine,
+                            cMaterial: history.cMaterial,
+                            cElektricity: history.cElektricity,
+                            cGas: history.cGas,
+                            cLabor: history.cLabor,
+                            cTotal: history.cTotal,
+                        }
+                    })
+                }
+            },
+            backIndex() {
+                this.$router.push('/')
             }
         },
         mounted() {
             this.getHistory()
+            if (window.history && window.history.pushState) {
+                history.pushState(null, null, document.URL);
+                window.addEventListener('popstate', this.backIndex, false);//false阻止默认事件
+            }
+        },
+        destroyed(){
+            window.removeEventListener('popstate', this.backIndex, false);//false阻止默认事件
         }
     }
 </script>

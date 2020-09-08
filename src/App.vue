@@ -1,7 +1,5 @@
 <template>
-    <keep-alive exclude="History,Result,CustomResult">
         <router-view/>
-    </keep-alive>
 </template>
 
 <script>
@@ -20,5 +18,12 @@
 
     .q-layout-container {
         height: 100%;
+    }
+    .q-tab__label {
+        font-size: 12px !important;
+    }
+    .q-layout__section--marginal {
+        background-color: #fff !important;
+        color: #fff !important;
     }
 </style>

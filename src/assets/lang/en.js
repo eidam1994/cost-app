@@ -7,6 +7,11 @@ module.exports = {
         result: 'Result',
     },
     errorInfo: {
+        power: 'Please enter Machine max working power.',
+        model: 'Please enter Machine Price.',
+        gas: 'Please enter Gas cost per hour.',
+        flasche: 'Please enter basal area of the machine.',
+        materialPrice: 'Please enter Material Price per cm³.',
         process: 'Please enter Process.',
         company: 'Please enter Manufacturer.',
         maschine: 'Please enter Machine.',
@@ -1978,4 +1983,5 @@ module.exports = {
     ],
     confirm: "Confirm",
     import: "Please upload the STL file",
+    exit: "Press again to exit the app."
 }

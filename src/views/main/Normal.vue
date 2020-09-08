@@ -38,7 +38,7 @@
                             </q-avatar>
                         </template>
                     </q-select>
-                    <q-input style="margin: 10px" color="teal" outlined v-model="buildRate" :label="$t('options.rate')">
+                    <q-input type="tel" style="margin: 10px" color="teal" outlined v-model="buildRate" :label="$t('options.rate')">
                         <template v-slot:append>
                             <q-avatar>
                                 <img src="@icons/rate.png">
@@ -47,7 +47,7 @@
                         <q-slider v-show="maxRate > 0" style="height: 100%" v-model="buildRate" :min="0" :max="maxRate"
                                   :step="0.1"/>
                     </q-input>
-                    <q-input style="margin: 10px" color="teal" outlined v-model="volume" :label="$t('options.volume')">
+                    <q-input type="tel" class="volume" style="margin: 10px" color="teal" outlined v-model="volume" :label="$t('options.volume')">
                         <template v-slot:append>
                             <q-avatar>
                                 <img src="@icons/volume.png">
@@ -57,10 +57,11 @@
                     <q-btn @click="importStl" class="importBtn" color="primary" outline icon="3d_rotation"
                            :label="$t('import')"/>
                     <input ref="uploadFile" @change="getFile" type="file" style="display:none"/>
-                    <div ref="stlCanvas" id="stlCanvas" style="width:100%; height:300px;display:none"></div>
+                    <div id="stlCanvas" v-bind:volume="volume" style="width:100%; height:300px;display:none"></div>
                     <q-btn class="confirmBtn" color="primary" :label="$t('confirm')" @click="calculate"/>
                 </div>
             </q-page-container>
+            <q-tooltip anchor="center middle" v-model="showing">{{$t('exit')}}</q-tooltip>
             <q-footer height-hint="150" bordered class="bg-white text-primary">
                 <tool-bar :tab="'normal'"></tool-bar>
             </q-footer>
@@ -81,19 +82,19 @@
 </template>
 
 <script>
-    import * as THREE from 'three'
     import $ from 'jquery'
-    import HeadBar from "@components/HeadBar";
-    import ToolBar from "@components/ToolBar";
+    import {draw} from "@/utils/import";
+    import {isEmpty, setHistory, uuid} from "@/utils/util";
 
     export default {
         name: "Home",
         components: {
-            'head-bar': HeadBar,
-            'tool-bar': ToolBar
+            'head-bar': () => import('@components/HeadBar'),
+            'tool-bar': () => import('@components/ToolBar')
         },
         data() {
             return {
+                showing: false,
                 error: false,
                 errorInfo: '',
                 process: null,
@@ -112,17 +113,11 @@
                 materialPrice: null,
                 buildTime: null,
                 rcy: null,
-                processList: this.$t('processList'),
                 companyList: [],
                 stlParams: {
                     stlFile: false,
                     width: 0,
                     height: 0,
-                    renderer: null,
-                    camera: null,
-                    scene: null,
-                    light: null,
-                    controls: null,
                 },
                 result: {
                     cMaschine: null,
@@ -170,6 +165,10 @@
             }
         },
         computed: {
+            processList() {
+                this.process = null
+                return this.$t('processList')
+            },
             maschineList() {
                 if (this.models) {
                     let maschineList = [];
@@ -239,6 +238,22 @@
                 let cTotal = cMaschine + cMaterial + cElektricity + cGas + cLabor
                 this.cTotal = cTotal.toFixed(2)
                 // console.log(cTotal.toFixed(2))
+                let result = new Object()
+                result['id'] = uuid()
+                result['type'] = 'normal'
+                result['process'] = this.process
+                result['company'] = this.company
+                result['maschine'] = this.maschine
+                result['material'] = this.material
+                result['buildRate'] = this.buildRate
+                result['volume'] = this.volume
+                result['cMaschine'] = this.cMaschine
+                result['cMaterial'] = this.cMaterial
+                result['cElektricity'] = this.cElektricity
+                result['cGas'] = this.cGas
+                result['cLabor'] = this.cLabor
+                result['cTotal'] = this.cTotal
+                setHistory(result)
                 this.$router.push({
                     name: 'result', query: {
                         process: this.process,
@@ -264,143 +279,51 @@
                 let windowURL = window.URL || window.webkitURL;
                 let url = windowURL.createObjectURL(stlFile);
                 $("#stlCanvas").show()
-                this.draw(url)
+                let width = $("#stlCanvas").innerWidth()
+                let height = $("#stlCanvas").innerHeight()
+                this.draw(url, width, height)
             },
-            initRender() {
-                this.stlParams.width = this.$refs.stlCanvas.clientWidth
-                this.stlParams.height = this.$refs.stlCanvas.clientHeight
-                this.stlParams.renderer = new THREE.WebGLRenderer({antialias: true});
-                this.stlParams.renderer.setSize(this.stlParams.width, this.stlParams.height);
-                //告诉渲染器需要阴影效果
-                this.stlParams.renderer.setClearColor(0xffffff);
-                this.$refs.stlCanvas.appendChild(this.stlParams.renderer.domElement);
-            },
-            initCamera() {
-                this.stlParams.camera = new THREE.PerspectiveCamera(45, this.stlParams.width / this.stlParams.height, 0.1, 1000);
-                this.stlParams.camera.position.set(0, 40, 50);
-                this.stlParams.camera.lookAt(new THREE.Vector3(0, 0, 0));
-            },
-            initScene() {
-                this.stlParams.scene = new THREE.Scene();
-            },
-            initLight() {
-                this.stlParams.scene.add(new THREE.AmbientLight(0x444444));
-
-                this.stlParams.light = new THREE.PointLight(0xffffff);
-                this.stlParams.light.position.set(0, 50, 50);
-
-                //告诉平行光需要开启阴影投射
-                this.stlParams.light.castShadow = true;
-
-                this.stlParams.scene.add(this.stlParams.light);
-            },
-            initModel(url) {
-                //辅助工具
-                var helper = new THREE.AxesHelper(50);
-                this.stlParams.scene.add(helper);
-                var STLLoader = require('three-stl-loader')(THREE)
-                var loader = new STLLoader()
-                let volume = this.volume
-                let scene = this.stlParams.scene
-                let that = this
-                loader.load(url, function (geometry) {
-                    if (geometry instanceof THREE.BufferGeometry) {
-                        geometry = new THREE.Geometry().fromBufferGeometry(geometry);
-                    }
-
-                    //尺寸
-                    geometry.computeBoundingBox();
-
-                    function vFun(p1, p2, p3) {
-                        //借助threejs的Vector3的叉乘、点乘方法进行计算
-                        return p1.clone().cross(p2).dot(p3) / 6; //p1叉乘p2点乘p3除以6
-                    }
-
-                    // 声明一个变量表示几何体的体积
-                    var V = 0.0;
-                    // 几何体三角形索引
-                    for (var i = 0; i < geometry.faces.length; i++) {
-                        // 几何体三角形索引
-                        var index0 = geometry.faces[i].a;
-                        var index1 = geometry.faces[i].b;
-                        var index2 = geometry.faces[i].c;
-                        // 通过索引访问三角形顶点坐标值
-                        var p0 = geometry.vertices[index0];
-                        var p1 = geometry.vertices[index1];
-                        var p2 = geometry.vertices[index2];
-                        //使用下面的函数，并不会改变p0, p1, p2引用指向的geo顶点坐标值
-                        //三角形与坐标原点构成的四面体体积累计计算
-                        V += vFun(p0, p1, p2);
-
-                    }
-                    volume = (V / 1000.0).toFixed(2);
-                    that.updateVolume(volume)
-                    //创建纹理
-                    var mat = new THREE.MeshLambertMaterial({color: 0x00ffff});
-                    var mesh = new THREE.Mesh(geometry, mat);
-
-                    mesh.rotation.x = -0.5 * Math.PI; //将模型摆正
-                    mesh.scale.set(0.5, 0.5, 0.5); //缩放
-                    geometry.center(); //居中显示
-                    scene.add(mesh);
-
-                    var boundingBox = geometry.boundingBox;
-                    console.log('x_y_z:', boundingBox.max);//实际长宽高，取2x,2y,2z。
-                });
-            },
-            initControls() {
-                var OrbitControls = require('three-orbit-controls')(THREE)
-                this.stlParams.controls = new OrbitControls(this.stlParams.camera, this.stlParams.renderer.domElement);
-                // 如果使用animate方法时，将此函数删除
-                //controls.addEventListener( 'change', render );
-                // 使动画循环使用时阻尼或自转 意思是否有惯性
-                this.stlParams.controls.enableDamping = true;
-                //动态阻尼系数 就是鼠标拖拽旋转灵敏度
-                //controls.dampingFactor = 0.25;
-                //是否可以缩放
-                this.stlParams.controls.enableZoom = true;
-                //是否自动旋转
-                this.stlParams.controls.autoRotate = true;
-                this.stlParams.controls.autoRotateSpeed = 0.5;
-                //设置相机距离原点的最远距离
-                this.stlParams.controls.minDistance = 1;
-                //设置相机距离原点的最远距离
-                this.stlParams.controls.maxDistance = 200;
-                //是否开启右键拖拽
-                this.stlParams.controls.enablePan = true;
-            },
-            render() {
-                this.stlParams.renderer.render(this.stlParams.scene, this.stlParams.camera);
-            },
-            onWindowResize() {
-                this.stlParams.camera.aspect = this.stlParams.width / this.stlParams.height;
-                this.stlParams.camera.updateProjectionMatrix();
-                this.render();
-                this.stlParams.renderer.setSize(this.stlParams.width, this.stlParams.height);
-            },
-            animate() {
-                //更新控制器
-                this.render();
-
-                this.stlParams.controls.update();
-
-                requestAnimationFrame(this.animate);
-            },
-            draw(url) {
-                this.initRender();
-                this.initScene();
-                this.initCamera();
-                this.initLight();
-                this.initModel(url);
-                this.initControls();
-                this.animate();
-                window.onresize = this.onWindowResize;
-            },
-            updateVolume(volume) {
-                this.volume = volume;
+            draw(url, width, height) {
+                var stlCanvas = document.getElementById("stlCanvas");
+                draw(url, stlCanvas, width, height)
             }
         },
         mounted() {
+            document.addEventListener('plusready', function () {
+                var webview = plus.webview.currentWebview()
+                plus.key.addEventListener('backbutton', function () {
+                    webview.canBack(function (e) {
+                        if (e.canBack) {
+                            webview.back()
+                        } else {
+                            // webview.close() //hide,quit
+                            // plus.runtime.quit()
+                            // 首页返回键处理
+                            // 处理逻辑：1秒内，连续两次按返回键，则退出应用；
+                            var first = null
+                            plus.key.addEventListener(
+                                'backbutton',
+                                function () {
+                                    // 首次按键，提示‘再按一次退出应用’
+                                    if (!first) {
+                                        first = new Date().getTime()
+                                        this.showing = true // 此处可以用自定义提示
+                                        setTimeout(function () {
+                                            first = null
+                                            this.showing = false
+                                        }, 1000)
+                                    } else {
+                                        if (new Date().getTime() - first < 1500) {
+                                            plus.runtime.quit()
+                                        }
+                                    }
+                                },
+                                false
+                            )
+                        }
+                    })
+                })
+            })
         }
     }
 </script>

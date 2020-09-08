@@ -109,14 +109,11 @@
 </template>
 
 <script>
-    import HeadBar from "@components/HeadBar";
-    import ToolBar from "@components/ToolBar";
-
     export default {
         name: "CustomResult",
         components: {
-            'head-bar': HeadBar,
-            'tool-bar': ToolBar
+            'head-bar': () => import('@components/HeadBar'),
+            'tool-bar': () => import('@components/ToolBar')
         },
         methods: {
             drawTable() {

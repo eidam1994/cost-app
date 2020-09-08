@@ -95,20 +95,18 @@
             </q-card>
         </q-page-container>
         <q-footer height-hint="150" bordered class="bg-white text-primary">
-            <tool-bar :tab="'normal'"></tool-bar>
+            <tool-bar :tab="'custom'"></tool-bar>
         </q-footer>
     </q-layout>
 </template>
 
 <script>
-    import HeadBar from "@components/HeadBar";
-    import ToolBar from "@components/ToolBar";
 
     export default {
         name: "Result",
         components: {
-            'head-bar': HeadBar,
-            'tool-bar': ToolBar
+            'head-bar': () => import('@components/HeadBar'),
+            'tool-bar': () => import('@components/ToolBar')
         },
         methods: {
             drawTable() {

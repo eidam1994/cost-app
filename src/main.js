@@ -18,7 +18,6 @@ Vue.prototype.$echarts = Echarts
 
 Vue.config.productionTip = false
 
-// 路由拦截器
 
 new Vue({
     router,

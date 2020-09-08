@@ -5,28 +5,28 @@
                 <head-bar :title="$t('toolbar.custom')" :back="false"></head-bar>
             </q-header>
             <q-page-container>
-                <q-input style="margin: 10px" color="teal" outlined v-model="model" :label="$t('customOptions.model')">
+                <q-input type="tel" style="margin: 10px" color="teal" outlined v-model="model" :label="$t('customOptions.model')">
                     <template v-slot:append>
                         <q-avatar square>
                             <img src="@icons/data.png">
                         </q-avatar>
                     </template>
                 </q-input>
-                <q-input style="margin: 10px" color="teal" outlined v-model="power" :label="$t('customOptions.power')">
+                <q-input type="tel" style="margin: 10px" color="teal" outlined v-model="power" :label="$t('customOptions.power')">
                     <template v-slot:append>
                         <q-avatar square>
                             <img src="@icons/power.png">
                         </q-avatar>
                     </template>
                 </q-input>
-                <q-input style="margin: 10px" color="teal" outlined v-model="gas" :label="$t('customOptions.gas')">
+                <q-input type="tel" style="margin: 10px" color="teal" outlined v-model="gas" :label="$t('customOptions.gas')">
                     <template v-slot:append>
                         <q-avatar square>
                             <img src="@icons/gas.png">
                         </q-avatar>
                     </template>
                 </q-input>
-                <q-input style="margin: 10px" color="teal" outlined v-model="flasche"
+                <q-input type="tel" style="margin: 10px" color="teal" outlined v-model="flasche"
                          :label="$t('customOptions.flasche')">
                     <template v-slot:append>
                         <q-avatar square>
@@ -34,7 +34,7 @@
                         </q-avatar>
                     </template>
                 </q-input>
-                <q-input style="margin: 10px" color="teal" outlined v-model="material"
+                <q-input type="tel" style="margin: 10px" color="teal" outlined v-model="material"
                          :label="$t('customOptions.material')">
                     <template v-slot:append>
                         <q-avatar square>
@@ -42,14 +42,14 @@
                         </q-avatar>
                     </template>
                 </q-input>
-                <q-input style="margin: 10px" color="teal" outlined v-model="rate" :label="$t('customOptions.rate')">
+                <q-input type="tel" style="margin: 10px" color="teal" outlined v-model="rate" :label="$t('customOptions.rate')">
                     <template v-slot:append>
                         <q-avatar square>
                             <img src="@icons/flasche.png">
                         </q-avatar>
                     </template>
                 </q-input>
-                <q-input style="margin: 10px" color="teal" outlined v-model="volume"
+                <q-input type="tel" style="margin: 10px" color="teal" outlined v-model="volume"
                          :label="$t('customOptions.volume')">
                     <template v-slot:append>
                         <q-avatar square>
@@ -63,19 +63,28 @@
                 <tool-bar :tab="'custom'"></tool-bar>
             </q-footer>
         </q-layout>
+        <q-dialog
+                v-model="error">
+            <q-card style="width: 100%">
+                <q-card-section>
+                    <div class="text-h6">Error</div>
+                </q-card-section>
+                <q-card-section class="q-pt-none">
+                    {{errorInfo}}
+                </q-card-section>
+            </q-card>
+        </q-dialog>
     </div>
 </template>
 
 <script>
-    import HeadBar from "@components/HeadBar";
-    import ToolBar from "@components/ToolBar";
-    import {setHistory, uuid} from "@/utils/util";
+    import {isEmpty, setHistory, uuid} from "@/utils/util";
 
     export default {
         name: "Manager",
         components: {
-            'head-bar': HeadBar,
-            'tool-bar': ToolBar
+            'head-bar': () => import('@components/HeadBar'),
+            'tool-bar': () => import('@components/ToolBar')
         },
         data() {
             return {
@@ -94,11 +103,48 @@
                 cElektricity: null,
                 cGas: null,
                 cLabor: null,
-                cTotal: null
+                cTotal: null,
+                error: false,
+                errorInfo: ''
             }
         },
         methods: {
             calculate() {
+                if (isEmpty(this.model)) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.model')
+                    return false
+                }
+                if (isEmpty(this.power)) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.power')
+                    return false
+                }
+                if (isEmpty(this.gas)) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.gas')
+                    return false
+                }
+                if (isEmpty(this.flasche)) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.flasche')
+                    return false
+                }
+                if (isEmpty(this.material)) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.materialPrice')
+                    return false
+                }
+                if (isEmpty(this.rate)) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.rate')
+                    return false
+                }
+                if (isEmpty(this.volume)) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.volume')
+                    return false
+                }
                 this.buildTime = this.volume / this.rate
                 this.rcy = parseFloat(this.flasche) * 1.2 * 7.5 * 12;
                 let cMaschine = (((parseFloat(this.model) / 6.0) * (1.15) + parseFloat(this.rcy)) / (365.0 * 24.0 * 0.9)) * this.buildTime
@@ -148,7 +194,19 @@
                         cTotal: this.cTotal,
                     }
                 })
+            },
+            backIndex() {
+                this.$router.replace('/')
             }
+        },
+        mounted() {
+            if (window.history && window.history.pushState) {
+                history.pushState(null, null, document.URL);
+                window.addEventListener('popstate', this.backIndex, false);//false阻止默认事件
+            }
+        },
+        destroyed(){
+            window.removeEventListener('popstate', this.backIndex, false);//false阻止默认事件
         }
     }
 </script>

@@ -70,7 +70,7 @@ const removeStore = name => {
  * 判断为空
  */
 const isEmpty = (value) => {
-    if (value == undefined || value == '') {
+    if (value == undefined || value == null || value == '') {
         return true
     } else {
         return false

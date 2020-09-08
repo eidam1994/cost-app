@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Index from "@views/Index";
 import Normal from "@views/main/Normal";
 import Custom from "@views/main/Custom";
 import History from "@views/main/History";
@@ -13,28 +12,43 @@ const routes = [
     {
         path: '/',
         name: 'normal',
-        component: Normal
+        component: Normal,
+        meta: {
+            isIndex: true
+        }
     },
     {
         path: '/custom',
         name: 'custom',
-        component: Custom
+        component: Custom,
+        meta: {
+            isIndex: true
+        }
     },
     {
         path: '/history',
         name: 'history',
-        component: History
+        component: History,
+        meta: {
+            isIndex: true
+        }
     },
     {
         path: '/result',
         name: 'result',
-        component: Result
+        component: Result,
+        meta: {
+            isIndex: false
+        }
     }
     ,
     {
         path: '/customResult',
         name: 'customResult',
-        component: CustomResult
+        component: CustomResult,
+        meta: {
+            isIndex: false
+        }
     }
 ]
 
