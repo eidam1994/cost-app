@@ -61,7 +61,6 @@
                     <q-btn class="confirmBtn" color="primary" :label="$t('confirm')" @click="calculate"/>
                 </div>
             </q-page-container>
-            <q-tooltip anchor="center middle" v-model="showing">{{$t('exit')}}</q-tooltip>
             <q-footer height-hint="150" bordered class="bg-white text-primary">
                 <tool-bar :tab="'normal'"></tool-bar>
             </q-footer>
@@ -94,7 +93,6 @@
         },
         data() {
             return {
-                showing: false,
                 error: false,
                 errorInfo: '',
                 process: null,
@@ -288,43 +286,6 @@
                 draw(url, stlCanvas, width, height)
             }
         },
-        mounted() {
-            document.addEventListener('plusready', function () {
-                var webview = plus.webview.currentWebview()
-                plus.key.addEventListener('backbutton', function () {
-                    webview.canBack(function (e) {
-                        if (e.canBack) {
-                            webview.back()
-                        } else {
-                            // webview.close() //hide,quit
-                            // plus.runtime.quit()
-                            // 首页返回键处理
-                            // 处理逻辑：1秒内，连续两次按返回键，则退出应用；
-                            var first = null
-                            plus.key.addEventListener(
-                                'backbutton',
-                                function () {
-                                    // 首次按键，提示‘再按一次退出应用’
-                                    if (!first) {
-                                        first = new Date().getTime()
-                                        this.showing = true // 此处可以用自定义提示
-                                        setTimeout(function () {
-                                            first = null
-                                            this.showing = false
-                                        }, 1000)
-                                    } else {
-                                        if (new Date().getTime() - first < 1500) {
-                                            plus.runtime.quit()
-                                        }
-                                    }
-                                },
-                                false
-                            )
-                        }
-                    })
-                })
-            })
-        }
     }
 </script>
 
