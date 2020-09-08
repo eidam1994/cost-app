@@ -1,70 +1,101 @@
 <template>
-    <div>
-        <div class="calculate">
-            <q-select style="margin: 10px" color="teal"
-                      outlined v-model="process" :options="processList" :label="$t('options.process')">
-                <template v-slot:append>
-                    <q-avatar square>
-                        <img src="@icons/process.png">
-                    </q-avatar>
-                </template>
-            </q-select>
-            <q-select style="margin: 10px" color="teal"
-                      outlined v-model="company" :options="companyList" :label="$t('options.company')">
-                <template v-slot:append>
-                    <q-avatar square>
-                        <img src="@icons/company.png">
-                    </q-avatar>
-                </template>
-            </q-select>
-            <q-select style="margin: 10px" color="teal"
-                      outlined v-model="maschine" :options="maschineList" :label="$t('options.maschine')">
-                <template v-slot:append>
-                    <q-avatar square>
-                        <img src="@icons/data.png">
-                    </q-avatar>
-                </template>
-            </q-select>
-            <q-select style="margin: 10px" color="teal"
-                      outlined v-model="material" :options="materialList" :label="$t('options.material')">
-                <template v-slot:append>
-                    <q-avatar square>
-                        <img src="@icons/interrelated.png">
-                    </q-avatar>
-                </template>
-            </q-select>
-            <q-input style="margin: 10px" color="teal" outlined v-model="buildRate" :label="$t('options.rate')">
-                <template v-slot:append>
-                    <q-avatar>
-                        <img src="@icons/rate.png">
-                    </q-avatar>
-                </template>
-                <q-slider v-show="maxRate > 0" style="height: 100%" v-model="buildRate" :min="0" :max="maxRate"
-                          :step="0.1"/>
-            </q-input>
-            <q-input style="margin: 10px" color="teal" outlined v-model="volume" :label="$t('options.volume')">
-                <template v-slot:append>
-                    <q-avatar>
-                        <img src="@icons/volume.png">
-                    </q-avatar>
-                </template>
-            </q-input>
-            <q-btn @click="importStl" class="importBtn" color="primary" outline icon="3d_rotation" :label="$t('import')" />
-            <input ref="uploadFile" @change="getFile" type="file" style="display:none" />
-            <div ref="stlCanvas" id="stlCanvas" style="width:100%; height:300px;display:none"></div>
-            <q-btn class="confirmBtn" color="primary" :label="$t('confirm')" @click="calculate"/>
-        </div>
-        <div class="result"></div>    
+    <div style="height: 100%">
+        <q-layout view="lHh lpr lFf" container>
+            <q-header elevated>
+                <head-bar :title="$t('toolbar.normal')" :back="false"></head-bar>
+            </q-header>
+            <q-page-container>
+                <div class="calculate">
+                    <q-select style="margin: 10px" color="teal"
+                              outlined v-model="process" :options="processList" :label="$t('options.process')">
+                        <template v-slot:append>
+                            <q-avatar square>
+                                <img src="@icons/process.png">
+                            </q-avatar>
+                        </template>
+                    </q-select>
+                    <q-select style="margin: 10px" color="teal"
+                              outlined v-model="company" :options="companyList" :label="$t('options.company')">
+                        <template v-slot:append>
+                            <q-avatar square>
+                                <img src="@icons/company.png">
+                            </q-avatar>
+                        </template>
+                    </q-select>
+                    <q-select style="margin: 10px" color="teal"
+                              outlined v-model="maschine" :options="maschineList" :label="$t('options.maschine')">
+                        <template v-slot:append>
+                            <q-avatar square>
+                                <img src="@icons/data.png">
+                            </q-avatar>
+                        </template>
+                    </q-select>
+                    <q-select style="margin: 10px" color="teal"
+                              outlined v-model="material" :options="materialList" :label="$t('options.material')">
+                        <template v-slot:append>
+                            <q-avatar square>
+                                <img src="@icons/interrelated.png">
+                            </q-avatar>
+                        </template>
+                    </q-select>
+                    <q-input style="margin: 10px" color="teal" outlined v-model="buildRate" :label="$t('options.rate')">
+                        <template v-slot:append>
+                            <q-avatar>
+                                <img src="@icons/rate.png">
+                            </q-avatar>
+                        </template>
+                        <q-slider v-show="maxRate > 0" style="height: 100%" v-model="buildRate" :min="0" :max="maxRate"
+                                  :step="0.1"/>
+                    </q-input>
+                    <q-input style="margin: 10px" color="teal" outlined v-model="volume" :label="$t('options.volume')">
+                        <template v-slot:append>
+                            <q-avatar>
+                                <img src="@icons/volume.png">
+                            </q-avatar>
+                        </template>
+                    </q-input>
+                    <q-btn @click="importStl" class="importBtn" color="primary" outline icon="3d_rotation"
+                           :label="$t('import')"/>
+                    <input ref="uploadFile" @change="getFile" type="file" style="display:none"/>
+                    <div ref="stlCanvas" id="stlCanvas" style="width:100%; height:300px;display:none"></div>
+                    <q-btn class="confirmBtn" color="primary" :label="$t('confirm')" @click="calculate"/>
+                </div>
+            </q-page-container>
+            <q-footer height-hint="150" bordered class="bg-white text-primary">
+                <tool-bar :tab="'normal'"></tool-bar>
+            </q-footer>
+        </q-layout>
+        <q-dialog
+                v-model="error">
+            <q-card style="width: 100%">
+                <q-card-section>
+                    <div class="text-h6">Error</div>
+                </q-card-section>
+                <q-card-section class="q-pt-none">
+                    {{errorInfo}}
+                </q-card-section>
+            </q-card>
+        </q-dialog>
+
     </div>
 </template>
 
 <script>
     import * as THREE from 'three'
     import $ from 'jquery'
+    import HeadBar from "@components/HeadBar";
+    import ToolBar from "@components/ToolBar";
+
     export default {
         name: "Home",
+        components: {
+            'head-bar': HeadBar,
+            'tool-bar': ToolBar
+        },
         data() {
             return {
+                error: false,
+                errorInfo: '',
                 process: null,
                 company: null,
                 maschine: null,
@@ -158,31 +189,76 @@
         },
         methods: {
             calculate() {
+                if (this.process == null) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.process')
+                    return false
+                }
+                if (this.company == null) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.company')
+                    return false
+                }
+                if (this.maschine == null) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.maschine')
+                    return false
+                }
+                if (this.material == null) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.material')
+                    return false
+                }
+                if (this.buildRate == null) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.rate')
+                    return false
+                }
+                if (this.volume == null) {
+                    this.error = true
+                    this.errorInfo = this.$t('errorInfo.volume')
+                    return false
+                }
                 this.buildTime = this.volume / this.buildRate;
                 this.rcy = parseFloat(this.flaeche) * 1.2 * 7.5 * 12;
                 let cMaschine = (((parseFloat(this.modelPrice) / 6.0) * (1.15) + parseFloat(this.rcy)) / (365.0 * 24.0 * 0.9)) * this.buildTime;
-                this.cMaschine = cMaschine
+                this.cMaschine = cMaschine.toFixed(2)
                 // console.log(cMaschine.toFixed(2))
                 let cMaterial = this.volume * this.materialPrice * 1.1
-                this.cMaterial = cMaterial
+                this.cMaterial = cMaterial.toFixed(2)
                 // console.log(cMaterial.toFixed(2))
                 let cElektricity = this.ech * this.buildTime
-                this.cElektricity = cElektricity
+                this.cElektricity = cElektricity.toFixed(2)
                 // console.log(cElektricity.toFixed(2))
                 let cGas = this.gch * this.buildTime
-                this.cGas = cGas
+                this.cGas = cGas.toFixed(2)
                 // console.log(cGas.toFixed(2))
                 let cLabor = 35.9 * (parseFloat(this.buildTime) / 50);
-                this.cLabor = cLabor
+                this.cLabor = cLabor.toFixed(2)
                 // console.log(cLabor.toFixed(2))
                 let cTotal = cMaschine + cMaterial + cElektricity + cGas + cLabor
-                this.cTotal = cTotal
+                this.cTotal = cTotal.toFixed(2)
                 // console.log(cTotal.toFixed(2))
+                this.$router.push({
+                    name: 'result', query: {
+                        process: this.process,
+                        company: this.company,
+                        maschine: this.maschine,
+                        material: this.material,
+                        volume: this.volume,
+                        cMaschine: this.cMaschine,
+                        cMaterial: this.cMaterial,
+                        cElektricity: this.cElektricity,
+                        cGas: this.cGas,
+                        cLabor: this.cLabor,
+                        cTotal: this.cTotal,
+                    }
+                })
             },
             importStl() {
                 this.$refs.uploadFile.dispatchEvent(new MouseEvent('click'))
             },
-            getFile(e){
+            getFile(e) {
                 $("#stlCanvas").empty()
                 let stlFile = e.target.files[0]
                 let windowURL = window.URL || window.webkitURL;
@@ -193,16 +269,16 @@
             initRender() {
                 this.stlParams.width = this.$refs.stlCanvas.clientWidth
                 this.stlParams.height = this.$refs.stlCanvas.clientHeight
-                this.stlParams.renderer = new THREE.WebGLRenderer({antialias:true});
+                this.stlParams.renderer = new THREE.WebGLRenderer({antialias: true});
                 this.stlParams.renderer.setSize(this.stlParams.width, this.stlParams.height);
                 //告诉渲染器需要阴影效果
                 this.stlParams.renderer.setClearColor(0xffffff);
                 this.$refs.stlCanvas.appendChild(this.stlParams.renderer.domElement);
             },
             initCamera() {
-                this.stlParams.camera = new THREE.PerspectiveCamera(45, this.stlParams.width/this.stlParams.height, 0.1, 1000);
+                this.stlParams.camera = new THREE.PerspectiveCamera(45, this.stlParams.width / this.stlParams.height, 0.1, 1000);
                 this.stlParams.camera.position.set(0, 40, 50);
-                this.stlParams.camera.lookAt(new THREE.Vector3(0,0,0));
+                this.stlParams.camera.lookAt(new THREE.Vector3(0, 0, 0));
             },
             initScene() {
                 this.stlParams.scene = new THREE.Scene();
@@ -211,7 +287,7 @@
                 this.stlParams.scene.add(new THREE.AmbientLight(0x444444));
 
                 this.stlParams.light = new THREE.PointLight(0xffffff);
-                this.stlParams.light.position.set(0,50,50);
+                this.stlParams.light.position.set(0, 50, 50);
 
                 //告诉平行光需要开启阴影投射
                 this.stlParams.light.castShadow = true;
@@ -338,6 +414,7 @@
         width: calc(100% - 20px);
         margin: 10px 10px 0px 10px;
     }
+
     .importBtn {
         width: calc(100% - 20px);
         margin: 0px 10px 0px 10px;

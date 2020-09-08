@@ -1,14 +1,40 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Index from "@views/Index";
+import Normal from "@views/main/Normal";
+import Custom from "@views/main/Custom";
+import History from "@views/main/History";
+import Result from "@views/main/Result";
+import CustomResult from "@views/main/CustomResult";
 
 Vue.use(VueRouter)
 
 const routes = [
     {
         path: '/',
-        name: '首页',
-        component: Index
+        name: 'normal',
+        component: Normal
+    },
+    {
+        path: '/custom',
+        name: 'custom',
+        component: Custom
+    },
+    {
+        path: '/history',
+        name: 'history',
+        component: History
+    },
+    {
+        path: '/result',
+        name: 'result',
+        component: Result
+    }
+    ,
+    {
+        path: '/customResult',
+        name: 'customResult',
+        component: CustomResult
     }
 ]
 

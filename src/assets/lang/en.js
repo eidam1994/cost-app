@@ -3,7 +3,18 @@ module.exports = {
     toolbar: {
         normal: 'Normal',
         custom: 'Custom',
-        history: 'history'
+        history: 'History',
+        result: 'Result',
+    },
+    errorInfo: {
+        process: 'Please enter Process.',
+        company: 'Please enter Manufacturer.',
+        maschine: 'Please enter Machine.',
+        material: 'Please enter Material.',
+        rate: 'Please enter Build rate.',
+        volume: 'Please enter Build Volume.',
+        clear: 'Are you sure you want to clear the history?',
+        delete: 'Are you sure you want to delete the history?'
     },
     options: {
         process: 'Process',
@@ -11,6 +22,22 @@ module.exports = {
         maschine: 'Machine',
         material: 'Material',
         rate: 'Build rate',
+        volume: 'Build Volume (cm³)',
+        result: 'Result',
+        cMaschine: 'Maschine Cost',
+        cMaterial: 'Material Cost',
+        cElektricity: 'Electricity Cost',
+        cGas: 'Gas Cost',
+        cLabor: 'Labor Cost',
+        cTotal: 'Total Cost'
+    },
+    customOptions: {
+        model: 'Machine Price (€)',
+        power: 'Machine max working power (KW)',
+        gas: 'Gas cost per hour (€)',
+        flasche: 'basal area of the machine (m³)',
+        material: 'Material Price per cm³ (€)',
+        rate: 'Build rate (cm³/h)',
         volume: 'Build Volume (cm³)'
     },
     processList: ["Vat photopolymerization", "Material jetting", "Material extrusion",

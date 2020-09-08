@@ -43,9 +43,19 @@
                 </q-toolbar>
             </q-header>
             <q-page-container>
-                <keep-alive>
-                    <component :is="active"></component>
-                </keep-alive>
+                <q-tab-panels :keep-alive="true" v-model="tab" animated>
+                    <q-tab-panel style="padding: 0px" name="normal">
+                        <normal></normal>
+                    </q-tab-panel>
+
+                    <q-tab-panel style="padding: 0px" name="custom">
+                        <custom></custom>
+                    </q-tab-panel>
+
+                    <q-tab-panel style="padding: 0px" name="history">
+                        <history></history>
+                    </q-tab-panel>
+                </q-tab-panels>
             </q-page-container>
             <q-footer height-hint="150" bordered class="bg-white text-primary">
                 <q-tabs
@@ -54,9 +64,9 @@
                         dense
                         align="justify"
                         class="text-primary">
-                    <q-tab :ripple="false" @click="active = 'normal'" name="mails" icon="calculate" :label="$t('toolbar.normal')"/>
-                    <q-tab :ripple="false" @click="active = 'custom'" name="alarms" icon="ballot" :label="$t('toolbar.custom')"/>
-                    <q-tab :ripple="false" @click="active = 'history'" name="movies" icon="history" :label="$t('toolbar.history')"/>
+                    <q-tab :ripple="false" name="normal" to="/normal"  icon="calculate" :label="$t('toolbar.normal')"/>
+                    <q-tab :ripple="false" name="custom" to="/custom" icon="ballot" :label="$t('toolbar.custom')"/>
+                    <q-tab :ripple="false" name="history" to="/history" icon="history" :label="$t('toolbar.history')"/>
                 </q-tabs>
             </q-footer>
         </q-layout>
@@ -64,20 +74,22 @@
 </template>
 
 <script>
+    import Normal from "@views/main/Normal";
+    import History from "@views/main/History";
+    import Custom from "@views/main/Custom";
     export default {
         name: "Index",
         data() {
             return {
-                active: 'normal',
-                tab: 'mails',
+                tab: 'normal',
                 drawer: false
             }
         },
         components: {
             // 异步组件引入方式，需要展示组件的时候才渲染
-            'normal': () => import('@views/main/Normal'),
-            'history': () => import('@views/main/History'),
-            'custom': () => import('@views/main/Custom'),
+            'normal': Normal,
+            'history': History,
+            'custom': Custom,
         },
         methods: {
             changeLanguage(lang) {

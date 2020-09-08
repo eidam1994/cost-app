@@ -9,6 +9,7 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "core-js": "^3.6.5",
+    "echarts": "^4.9.0",
     "jquery": "^3.5.1",
     "quasar": "^1.0.0",
     "three": "^0.120.1",

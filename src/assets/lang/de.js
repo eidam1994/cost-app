@@ -11,6 +11,7 @@ module.exports = {
         maschine: 'Maschine',
         material: 'Material',
         rate: 'Druckgeschwindigkeit',
-        volume: 'Volumen (cm³)'
+        volume: 'Volumen (cm³)',
+        cMaschine: 'Maschinenkosten',
     }
 }

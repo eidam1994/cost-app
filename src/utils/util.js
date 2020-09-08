@@ -2,8 +2,8 @@
  * 时间戳
  * @param {*} timestamp  时间戳
  */
-const timestampToTime = (timestamp) => {
-    let date = new Date(timestamp) //时间戳为10位需*1000，时间戳为13位的话不需乘1000
+const timestampToTime = () => {
+    let date = new Date() //时间戳为10位需*1000，时间戳为13位的话不需乘1000
     let Y = date.getFullYear() + '-'
     let M =
         (date.getMonth() + 1 < 10 ?
@@ -29,6 +29,25 @@ const setStore = (name, content) => {
         content = JSON.stringify(content);
     }
     window.localStorage.setItem(name, content);
+}
+
+const setHistory = (history) => {
+    let historys = getStore('history')
+    if (historys == null || historys == undefined || historys == '') {
+        historys = new Array()
+    } else {
+        historys = JSON.parse(historys)
+    }
+    historys.push(history)
+    setStore('history', historys)
+}
+
+const uuid = () => {
+    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+}
+
+function S4() {
+    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
 }
 
 /**
@@ -57,6 +76,7 @@ const isEmpty = (value) => {
         return false
     }
 }
+
 /**
  * 设置cookie
  **/
@@ -97,5 +117,7 @@ export {
     setCookie,
     getCookie,
     delCookie,
-    isEmpty
+    isEmpty,
+    setHistory,
+    uuid
 }
