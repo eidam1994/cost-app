@@ -5,7 +5,22 @@ import '@css/colors.scss'
 import './quasar'
 import VueI18n from 'vue-i18n'
 import Echarts from 'echarts'
+import VueCordova from 'vue-cordova'
+Vue.use(VueCordova)
 Vue.use(VueI18n)
+
+// add cordova.js only if serving the app through file://
+if (window.location.protocol === 'file:' || window.location.port === '3000') {
+    var cordovaScript = document.createElement('script')
+    cordovaScript.setAttribute('type', 'text/javascript')
+    cordovaScript.setAttribute('src', 'cordova.js')
+    document.body.appendChild(cordovaScript)
+}
+//测试的
+Vue.cordova.on('deviceready', () => {
+    console.log('Cordova : device is ready !');
+    console.log('Vue.cordova :', Vue.cordova);
+});
 
 const i18n = new VueI18n({
     locale: 'en',    // 语言标识

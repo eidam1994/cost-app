@@ -124,7 +124,9 @@
                     cGas: null,
                     cLabor: null,
                     cTotal: null
-                }
+                },
+                lastTimeBackPress: 0,
+                timePeriodToExit: 2000
             }
         },
         watch: {
@@ -284,8 +286,28 @@
             draw(url, width, height) {
                 var stlCanvas = document.getElementById("stlCanvas");
                 draw(url, stlCanvas, width, height)
+            },
+            onDeviceReady() {
+                document.addEventListener("backbutton", this.onBackKeyDown, false);
+            },
+            onBackKeyDown(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if(new Date().getTime() - this.lastTimeBackPress < this.timePeriodToExit){
+                    navigator.app.closeApp();
+                }else{
+                    toastPlugin.toast(this.$t('exit'))
+                    this.lastTimeBackPress=new Date().getTime();
+                }
             }
         },
+        mounted() {
+            document.addEventListener("deviceready", this.onDeviceReady, false);
+        },
+        destroyed() {
+            document.removeEventListener("deviceready", this.onDeviceReady, false);
+            document.removeEventListener("backbutton", this.onBackKeyDown, false);
+        }
     }
 </script>
 
